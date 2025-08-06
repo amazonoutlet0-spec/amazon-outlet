@@ -165,7 +165,7 @@ DATABASE_URL=your_database_url # SQLite for dev, Postgres/Supabase for prod
 
 ## 🙌 Credits
 
-- Built by [Tesfamichael Tafere](https://tesfamichael-tafre.netlify.app/)
+- Built by [Amazon Outlet](https://tAmazon Outlet.netlify.app/)
 - Inspired by Amazon.com UI/UX
 - Some UI inspiration from [Dribbble](https://dribbble.com/)
 
