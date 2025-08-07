@@ -23,12 +23,11 @@ const Footer = () => {
         <div className={styles.footerSection}>
           <h4>Conócenos</h4>
           <ul>
-            <li>Carreras</li>
-            <li>Blog</li>
-            <li>Acerca de Amazon</li>
-            <li>Relaciones con Inversionistas</li>
-            <li>Dispositivos Amazon</li>
-            <li>Amazon Science</li>
+            <li><a href="https://www.amazon.jobs/en/" target="_blank" rel="noopener noreferrer">Trabaja en Amazon</a></li>
+            <li><a href="https://www.aboutamazon.com/?utm_source=gateway&utm_medium=footer" target="_blank" rel="noopener noreferrer">Blog</a></li>
+            <li><a href="https://www.aboutamazon.com/?utm_source=gateway&utm_medium=footer" target="_blank" rel="noopener noreferrer">Acerca de Amazon</a></li>
+            <li><a href="https://ir.aboutamazon.com/overview/default.aspx" target="_blank" rel="noopener noreferrer">Relaciones con Inversionistas</a></li>
+                        <li><a href="https://www.amazon.science/" target="_blank" rel="noopener noreferrer">Amazon Science</a></li>
           </ul>
         </div>
         <div className={styles.footerSection}>

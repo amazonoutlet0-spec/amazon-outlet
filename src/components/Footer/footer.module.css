@@ -49,6 +49,19 @@
   cursor: pointer;
   transition: color 0.2s;
 }
+.footerSection li a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footerSection li a:visited,
+.footerSection li a:active {
+  color: #fff;
+}
+.footerSection li a:hover {
+  color: #ff9900;
+  text-decoration: underline;
+}
 .footerSection li:hover {
   color: #ff9900;
   text-decoration: underline;

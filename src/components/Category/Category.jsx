@@ -100,4 +100,6 @@ const Category = () => {
   );
 };
 
+export { categories };
+
 export default Category;

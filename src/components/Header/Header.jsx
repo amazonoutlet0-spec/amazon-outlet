@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./header.module.css";
-import { FaSearch, FaBars, FaMapMarkerAlt, FaUser } from "react-icons/fa";
+import { FaSearch, FaBars, FaMapMarkerAlt, FaUser, FaTimes } from "react-icons/fa";
 import { HiOutlineShoppingCart } from "react-icons/hi2";
 import { FiChevronDown } from "react-icons/fi";
 import { Link } from "react-router-dom";
@@ -10,11 +10,41 @@ import { useCart } from "../DataProvider/DataProvider";
 import { ACTIONS } from "../../Utility/actions";
 import { toast } from "react-toastify";
 
+// Importar las categorías del componente Category
+import { categories as categoryList } from "../Category/Category";
+
 function Header() {
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  // Estados para el menú desplegable
   const [showMenu, setShowMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const menuRef = useRef(null);
+  
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  // Categorías para el menú desplegable
+  const categories = [
+    { name: 'Ofertas del Día', icon: '🔥' },
+    ...categoryList.map(cat => ({ name: cat.title, icon: '📦' }))
+  ];
+  
+  // Efecto para depuración
+  useEffect(() => {
+    console.log('showMenu actualizado a:', showMenu);
+  }, [showMenu]);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerState, setHeaderState] = useState("visible"); // 'visible', 'hidden', 'topFixed'
   const [country, setCountry] = useState("");
@@ -70,7 +100,6 @@ function Header() {
   const displayCountry = shippingDetails?.country || country || "Country";
 
   const desktopNavLinks = [
-    { name: "Todo", icon: FaBars },
     "Ofertas del Día",
     "Servicio al Cliente",
     "Registro",
@@ -107,6 +136,9 @@ function Header() {
     toast.success("¡Sesión cerrada exitosamente!");
   };
 
+  // Estado y funciones para el menú lateral
+  // showMenu y setShowMenu ya están declarados arriba
+
   return (
     <header
       ref={headerRef}
@@ -119,14 +151,6 @@ function Header() {
       {/* Top Row */}
       <div className={styles.topRow}>
         <div className={styles.leftSection}>
-          <button
-            className={`${styles.menuBtn} ${
-              isMobile ? "" : styles.hideOnDesktopFlex
-            }`}
-            onClick={() => setShowMenu(!showMenu)}
-          >
-            <FaBars />
-          </button>
           <Link to="/" className={styles.logoLink}>
             <img src={nav_logo} alt="Amazon Logo" className={styles.logo} />
           </Link>
@@ -304,28 +328,125 @@ function Header() {
           ${headerState !== "visible" ? styles.bottomRowHidden : ""}
         `}
       >
-        {isMobile
-          ? secondaryNavLinks.map((link) => (
+        <div className={styles.navContainer}>
+          {/* Botón Todo */}
+          <div className={styles.todoButtonContainer} ref={menuRef}>
+            <button 
+              className={styles.todoButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                console.log('Botón clickeado, estado actual:', showMenu);
+                
+                // Forzar un nuevo renderizado asegurando que el menú se muestre
+                requestAnimationFrame(() => {
+                  setShowMenu(prev => {
+                    const newState = !prev;
+                    console.log('Nuevo estado de showMenu:', newState);
+                    return newState;
+                  });
+                });
+              }}
+              aria-expanded={showMenu}
+            >
+              <FaBars className={styles.todoIcon} />
+              <span>Todo</span>
+            </button>
+            
+            {/* Menú desplegable - Versión simplificada */}
+            <div 
+              className={styles.dropdownMenu}
+              style={{
+                display: showMenu ? 'block' : 'none',
+                position: 'fixed',
+                top: '60px',
+                left: '10px',
+                backgroundColor: 'white',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.15)',
+                zIndex: '9999',
+                width: '300px',
+                padding: '10px',
+                opacity: showMenu ? 1 : 0,
+                transition: 'opacity 0.2s ease',
+                pointerEvents: showMenu ? 'auto' : 'none'
+              }}
+            >
+              <div className={styles.menuHeader}>
+                <h3>Hola, {user ? (user.displayName || 'Usuario') : 'Invitado'}</h3>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                  className={styles.closeButton}
+                  aria-label="Cerrar menú"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <div className={styles.menuSections}>
+                <div className={styles.menuSection}>
+                  <h4>Buscar por departamento</h4>
+                  <ul className={styles.categoriesList}>
+                    {categories.map((category, index) => (
+                      <li key={index} className={styles.categoryItem}>
+                        <span className={styles.categoryIcon} aria-hidden="true">
+                          {category.icon}
+                        </span>
+                        <span className={styles.categoryName}>{category.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className={styles.menuDivider}></div>
+                <div className={styles.menuSection}>
+                  <h4>Tu cuenta</h4>
+                  <ul>
+                    {user ? (
+                      <>
+                        <li>Mi perfil</li>
+                        <li>Mis pedidos</li>
+                        <li>Lista de deseos</li>
+                        <li onClick={handleSignOut}>Cerrar sesión</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>Iniciar sesión</li>
+                        <li>Crear cuenta</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {isMobile ? (
+            secondaryNavLinks.map((link) => (
               <span key={link} className={styles.navLink}>
                 {link}
               </span>
             ))
-          : desktopNavLinks.map((link) =>
-              typeof link === "string" ? (
-                <span key={link} className={styles.navLink}>
-                  {link}
-                </span>
-              ) : (
-                <span
-                  key={link.name}
-                  className={`${styles.navLink} ${styles.navLinkWithIcon}`}
-                >
-                  <link.icon className={styles.navIcon} />
-                  {link.name}
-                </span>
-              )
-            )}
+          ) : (
+            desktopNavLinks.map((link, index) => (
+              <span 
+                key={link} 
+                className={styles.navLink}
+                style={{ 
+                  fontWeight: index === 0 ? 'bold' : 'normal',
+                  color: index === 0 ? '#f08804' : 'inherit'
+                }}
+              >
+                {link}
+              </span>
+            ))
+          )}
+        </div>
       </nav>
+
+      {/* Menú lateral único */}
 
       <div
         className={`
@@ -345,79 +466,8 @@ function Header() {
         </Link>
       </div>
 
-      {/* Responsive Mobile Menu (triggered by top-left hamburger) */}
-      {/* Hamburger Mobile Menu Overlay */}
-      <div
-        className={`${styles.mobileMenu} ${
-          showMenu ? styles.mobileMenuOpen : ""
-        }`}
-        style={{ pointerEvents: showMenu ? "auto" : "none" }}
-      >
-                 <div className={styles.mobileMenuHeader}>
-           <FaUser className={styles.accountIcon} />
-           <h3 style={{ flex: 1 }}>
-             Hola,{" "}
-             {user ? (
-               user.displayName || user.email
-             ) : (
-               <Link to="/auth/signin">Identifícate</Link>
-             )}
-           </h3>
-          <button
-            className={styles.menuCloseBtn}
-            aria-label="Close menu"
-            onClick={() => setShowMenu(false)}
-            style={{
-              background: "none",
-              border: "none",
-              color: "white",
-              fontSize: "1.5rem",
-              cursor: "pointer",
-            }}
-          >
-            ×
-          </button>
-        </div>
-        <Link
-          to="/"
-          className={styles.navLink}
-          onClick={() => setShowMenu(false)}
-        >
-          Home
-        </Link>
-        <span className={styles.navLink}>Shop by Department</span>
-        <Link
-          to="/results"
-          className={styles.navLink}
-          onClick={() => setShowMenu(false)}
-        >
-          Today's Deals
-        </Link>
-        <div className={styles.mobileMenuItem}>
-          <Link
-            to="/orders"
-            className={styles.navLink}
-            onClick={() => setShowMenu(false)}
-          >
-            Your Orders
-          </Link>
-        </div>
-        <div className={styles.mobileMenuItem}>
-          <span className={styles.navLink}>Language: ES</span>
-        </div>
-        <span className={styles.navLink}>Customer Service</span>
-        <span className={styles.navLink}>Settings</span>
-        <span
-          className={styles.navLink}
-          onClick={() => {
-            handleSignOut();
-            setShowMenu(false);
-          }}
-          style={{ cursor: "pointer" }}
-        >
-          Sign Out
-        </span>
-      </div>
+
+
     </header>
   );
 }
